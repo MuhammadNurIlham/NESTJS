@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  phone         String    @unique
+  profile       Profile?
+  gender        Gender
+  role          Role      @default(Admin)
+  createdAt     DateTime  @default(now()) @map("createdAt")
+  updatedAt     DateTime? @map("updatedAt")
+
+  @@map("users")
+  doctors       Doctor[]
+  patients      Patient[]
+}
+
+model Doctor {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  nib           String
+  nip           String
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  phone         String    @unique
+  profile       Profile
+  gender        Gender
+  jadwal        String
+  spesialisasi  String
+  role          Role      @default(Doctor)
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@map("doctors")
+}
+
+model Patient {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  no_rm         String    @unique
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  phone         String    @unique
+  profile       Profile?
+  gender        Gender
+  status        Status
+  category      Category
+  pekerjaan     String
+  alergiObat    String
+  asuransi      String
+  role          Role      @default(Patient)
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@map("patients")
+}
+
+// Declaration Type for Embedded Document
+type Profile {
+  dob     DateTime
+  age     String?
+  address Address
+}
+
+type Address {
+  street String
+  city   String
+  state  String
+  zip    String
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+enum Role {
+  Admin
+  Doctor
+  Patient
+}
+
+enum Status {
+  Lajang
+  Menikah
+  Duda
+  Janda
+}
+
+enum Category {
+  An
+  Tn
+  Ny
+}
